@@ -2,7 +2,6 @@
 using Domain.Models.Settings;
 using Microsoft.Extensions.Options;
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
