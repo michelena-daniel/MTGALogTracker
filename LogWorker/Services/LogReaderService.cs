@@ -19,9 +19,8 @@ namespace LogWorker.Services
 
         public async void ProcessLogFile()
         {
-            var playerLogs = new List<string>();
+            var logTransaction = new LogTransaction();
             var logPath = _options.MtgaLogPath;
-            var timeStamp = DateTime.Now;
 
             if (!File.Exists(logPath))
             {
@@ -37,37 +36,63 @@ namespace LogWorker.Services
                 string previousLine = string.Empty;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    var timestampMatch = Regex.Match(previousLine, @"\[UnityCrossThreadLogger\](\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})");
-                    if (line.Contains("Rank_GetCombinedRankInfo") && timestampMatch.Success)
-                    {
-                        var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
-                        timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        var nextLine = sr.ReadLine();
-                        playerLogs.Add(nextLine);
-                    }
-
+                    logTransaction.UserInfo += FetchUserInfo(line, previousLine, sr);
+                    logTransaction.RankLogs += FetchRankInfo(line, previousLine, sr);
                     previousLine = line;
                 }
             }
 
-            string extractedLogs = string.Join(" ", playerLogs);
-            Console.WriteLine("Extracted logs:", extractedLogs);
-
             // Deserialize into objects
+            var rankDetailsList = DeserializeRankLogs(logTransaction.RankLogs);
+            var userInfo = DeserializeUserInfo(logTransaction.UserInfo);
+        }
+
+        private string FetchUserInfo(string line, string previousLine, StreamReader sr)
+        {
+            if(line.Contains("[Accounts - Login] Logged in successfully. Display Name:"))
+            {
+                var userNameWithCode = line.Replace("[Accounts - Login] Logged in successfully. Display Name:", "");
+                var userNameSplit = userNameWithCode.Split("#");
+                var userName = userNameSplit[0];
+                var userCode = userNameSplit[1];
+                var userInfo = new UserInfoDto { UserName = userName, UserCode = userCode };
+                var userInfoJson = JsonSerializer.Serialize(userInfo);
+
+                return userInfoJson;
+            }
+
+            return string.Empty;
+        }
+
+        private string FetchRankInfo(string line, string previousLine, StreamReader sr)
+        {
+            var timestampMatch = Regex.Match(previousLine, @"\[UnityCrossThreadLogger\](\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})");
+            if (line.Contains("Rank_GetCombinedRankInfo") && timestampMatch.Success)
+            {
+                var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
+                var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                var nextLine = sr.ReadLine();
+
+                return nextLine == null ? string.Empty : nextLine;
+            }
+
+            return string.Empty;
+        }
+
+        private List<PlayerRankDto> DeserializeRankLogs(string rankLogs)
+        {
             var jsonPattern = new Regex(@"\{""constructedSeasonOrdinal"".*?\}", RegexOptions.Singleline);
-            var matches = jsonPattern.Matches(extractedLogs);
+            var matches = jsonPattern.Matches(rankLogs);
             var rankDetailsList = new List<PlayerRankDto>();
 
             foreach (Match match in matches)
             {
                 try
                 {
-                    // Deserialize JSON into RankDetails object
-                    PlayerRankDto rankDetails = JsonSerializer.Deserialize<PlayerRankDto>(match.Value);
+                    var rankDetails = JsonSerializer.Deserialize<PlayerRankDto>(match.Value);
                     if (rankDetails != null)
                     {
                         rankDetailsList.Add(rankDetails);
-                        Console.WriteLine($"Rango: {rankDetails.ConstructedClass}, Nivel: {rankDetails.ConstructedLevel.ToString()}, Step: {rankDetails.ConstructedStep}, Partidas ganadas: {rankDetails.ConstructedMatchesWon}, Partidas perdidas: {rankDetails.ConstructedMatchesLost}");
                     }
                 }
                 catch (Exception ex)
@@ -75,6 +100,33 @@ namespace LogWorker.Services
                     Console.WriteLine($"Error parsing JSON: {ex.Message}");
                 }
             }
+
+            return rankDetailsList;
+        }
+
+        private List<UserInfoDto> DeserializeUserInfo(string userLogs)
+        {
+            var jsonPattern = new Regex(@"\{""UserName"".*?\}", RegexOptions.Singleline);
+            var matches = jsonPattern.Matches(userLogs);
+            var userInfoList = new List<UserInfoDto>();
+
+            foreach (Match match in matches)
+            {
+                try
+                {
+                    var userInfo = JsonSerializer.Deserialize<UserInfoDto>(match.Value);
+                    if (userInfo != null)
+                    {
+                        userInfoList.Add(userInfo);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing JSON: {ex.Message}");
+                }
+            }
+
+            return userInfoList;
         }
     }
 }

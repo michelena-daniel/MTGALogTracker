@@ -43,8 +43,8 @@ namespace Domain.Models
         [JsonPropertyName("limitedMatchesLost")]
         public int LimitedMatchesLost { get; set; }
 
-        // **Metadata fields (not part of JSON but added manually)**
-        [JsonIgnore] // Prevent these from being written back to JSON
+        // Metadata, prevent it gets written to json to avoid serializing issues
+        [JsonIgnore]
         public DateTime TimeStamp { get; set; }
 
         [JsonIgnore]
