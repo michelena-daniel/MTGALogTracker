@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Models.Settings;
+using LogWorker.Helpers;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text.Json;
@@ -43,8 +44,8 @@ namespace LogWorker.Services
             }
 
             // Deserialize into objects
-            var rankDetailsList = DeserializeRankLogs(logTransaction.RankLogs);
-            var userInfo = DeserializeUserInfo(logTransaction.UserInfo);
+            var rankDetailsList = JsonHelper.DeserializeJsonObjects<PlayerRankDto>(logTransaction.RankLogs, @"\{""constructedSeasonOrdinal"".*?\}");
+            var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, @"\{""UserName"".*?\}");
         }
 
         private string FetchUserInfo(string line, string previousLine, StreamReader sr)
@@ -77,56 +78,6 @@ namespace LogWorker.Services
             }
 
             return string.Empty;
-        }
-
-        private List<PlayerRankDto> DeserializeRankLogs(string rankLogs)
-        {
-            var jsonPattern = new Regex(@"\{""constructedSeasonOrdinal"".*?\}", RegexOptions.Singleline);
-            var matches = jsonPattern.Matches(rankLogs);
-            var rankDetailsList = new List<PlayerRankDto>();
-
-            foreach (Match match in matches)
-            {
-                try
-                {
-                    var rankDetails = JsonSerializer.Deserialize<PlayerRankDto>(match.Value);
-                    if (rankDetails != null)
-                    {
-                        rankDetailsList.Add(rankDetails);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error parsing JSON: {ex.Message}");
-                }
-            }
-
-            return rankDetailsList;
-        }
-
-        private List<UserInfoDto> DeserializeUserInfo(string userLogs)
-        {
-            var jsonPattern = new Regex(@"\{""UserName"".*?\}", RegexOptions.Singleline);
-            var matches = jsonPattern.Matches(userLogs);
-            var userInfoList = new List<UserInfoDto>();
-
-            foreach (Match match in matches)
-            {
-                try
-                {
-                    var userInfo = JsonSerializer.Deserialize<UserInfoDto>(match.Value);
-                    if (userInfo != null)
-                    {
-                        userInfoList.Add(userInfo);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error parsing JSON: {ex.Message}");
-                }
-            }
-
-            return userInfoList;
-        }
+        }        
     }
 }
