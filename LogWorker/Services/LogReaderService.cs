@@ -34,13 +34,11 @@ namespace LogWorker.Services
             _logger.LogInformation("Start MTGA log reader");
             var logTransaction = new LogTransaction();
             var logPath = _options.MtgaLogPath;
-
             if (!File.Exists(logPath))
             {
                 _logger.LogWarning("Log path not found.");
                 return;
             }
-
             // Read MTGA user's log
             using (FileStream fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader sr = new StreamReader(fs))
@@ -61,15 +59,14 @@ namespace LogWorker.Services
                     previousLine = line;
                 }
             }
-
             // Deserialize into objects
             var rankDetailsList = JsonHelper.DeserializeJsonObjects<PlayerRankDto>(logTransaction.RankLogs, @"\{""constructedSeasonOrdinal"".*?\}");
             var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, @"\{""UserNameWithCode"".*?\}");
-
             // Write into db
             await WriteUserInfo(userInfo);
             await WriteRankDetails(rankDetailsList);
-            _logger.LogInformation("Reader complete");
+            _logger.LogInformation("Reader complete for users: {Usernames}", string.Join(",", userInfo.Select(u => u.UserNameWithCode)));
+            _logger.LogInformation("Reader complete for ranks with the following logIds: {logIds}", string.Join(",", rankDetailsList.Select(r => r.LogId)));
         }
 
         private async Task WriteRankDetails(List<PlayerRankDto> rankDetails)
@@ -107,7 +104,7 @@ namespace LogWorker.Services
             }
 
             await _playerRankRepository.AddRanksAsync(filteredRankDetails);
-            _logger.LogInformation("Added new ranks");
+            _logger.LogInformation("Added new player ranks with the following log id's: {logIds}", string.Join(",", filteredRankDetails.Select(r => r.LogId)));
         }
 
         private async Task WriteUserInfo(List<UserInfoDto> userInfo)
@@ -129,7 +126,7 @@ namespace LogWorker.Services
             }
 
             await _userInfoRepository.AddUsersAsync(userInfoEntities);
-            _logger.LogInformation("Added new users");
+            _logger.LogInformation("Added users: {users}", string.Join(",", userInfoEntities.Select(u => u.UserNameWithCode)));
         }
 
         private string FetchUserInfo(string line, string previousLine, StreamReader sr)
