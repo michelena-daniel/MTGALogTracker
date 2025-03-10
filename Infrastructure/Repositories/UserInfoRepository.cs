@@ -35,6 +35,11 @@ namespace Infrastructure.Repositories
             }            
         }
 
+        public async Task<List<UserInfo>> GetAllUsers()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
         public async Task<List<UserInfo>> GetUserIdsByUserNames(List<string> userNames)
         {
             return await _context.Users

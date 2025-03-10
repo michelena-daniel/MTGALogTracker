@@ -33,6 +33,11 @@ namespace Infrastructure.Repositories
                     Console.WriteLine($"Database error: {ex.Message}");
                 }
             }            
-        }        
+        }
+        
+        public async Task<List<PlayerRank>> GetRanksByLogIds(List<string> logIds)
+        {
+            return await _context.PlayerRanks.Where(pr => logIds.Contains(pr.LogId)).ToListAsync();
+        }
     }
 }
