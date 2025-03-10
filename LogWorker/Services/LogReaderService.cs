@@ -31,6 +31,7 @@ namespace LogWorker.Services
 
         public async Task ProcessLogFile()
         {
+            _logger.LogInformation("Start MTGA log reader");
             var logTransaction = new LogTransaction();
             var logPath = _options.MtgaLogPath;
 
@@ -67,7 +68,8 @@ namespace LogWorker.Services
 
             // Write into db
             await WriteUserInfo(userInfo);
-            await WriteRankDetails(rankDetailsList);      
+            await WriteRankDetails(rankDetailsList);
+            _logger.LogInformation("Reader complete");
         }
 
         private async Task WriteRankDetails(List<PlayerRankDto> rankDetails)
@@ -84,8 +86,13 @@ namespace LogWorker.Services
             var rankDetailsEntity = _mapper.Map<List<PlayerRank>>(rankDetails);
             foreach (var rank in rankDetailsEntity)
             {
-                rank.UserId = users.FirstOrDefault(u => u.UserNameWithCode == rank.CurrentUser)?.UserId
-                              ?? throw new Exception($"User '{rank.User.UserNameWithCode}' not found.");
+                var user = users.FirstOrDefault(u => u.UserNameWithCode == rank.CurrentUser);
+                if (user == null)
+                {
+                    _logger.LogWarning($"Skipping rank: No matching user found for '{rank.CurrentUser}'.");
+                    continue;
+                }
+                rank.UserId = user.UserId;
             }
             // filter out ranks whhich already exist on database
             var logIds = rankDetailsEntity.Select(x => x.LogId).ToList();
@@ -100,6 +107,7 @@ namespace LogWorker.Services
             }
 
             await _playerRankRepository.AddRanksAsync(filteredRankDetails);
+            _logger.LogInformation("Added new ranks");
         }
 
         private async Task WriteUserInfo(List<UserInfoDto> userInfo)
@@ -121,6 +129,7 @@ namespace LogWorker.Services
             }
 
             await _userInfoRepository.AddUsersAsync(userInfoEntities);
+            _logger.LogInformation("Added new users");
         }
 
         private string FetchUserInfo(string line, string previousLine, StreamReader sr)
