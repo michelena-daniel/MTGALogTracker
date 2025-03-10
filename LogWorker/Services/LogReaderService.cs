@@ -73,8 +73,8 @@ namespace LogWorker.Services
                 var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
                 var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 var nextLine = sr.ReadLine();
-
-                return nextLine == null ? string.Empty : nextLine;
+                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\"}}";
+                return result;
             }
 
             return string.Empty;

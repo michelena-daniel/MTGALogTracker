@@ -5,6 +5,11 @@ namespace LogWorker.Helpers
 {
     public class JsonHelper
     {
+        private static readonly JsonSerializerOptions _options = new JsonSerializerOptions
+        {
+            Converters = { new CustomDateConverter() }
+        };
+
         public static List<T> DeserializeJsonObjects<T>(string logs, string jsonPattern)
         {
             var regex = new Regex(jsonPattern, RegexOptions.Singleline);
@@ -15,7 +20,7 @@ namespace LogWorker.Helpers
             {
                 try
                 {
-                    var deserializedObject = JsonSerializer.Deserialize<T>(match.Value);
+                    var deserializedObject = JsonSerializer.Deserialize<T>(match.Value, _options);
                     if (deserializedObject != null)
                     {
                         resultList.Add(deserializedObject);

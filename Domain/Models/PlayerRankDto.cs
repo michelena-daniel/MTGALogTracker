@@ -41,12 +41,10 @@ namespace Domain.Models
         public int LimitedMatchesWon { get; set; }
 
         [JsonPropertyName("limitedMatchesLost")]
-        public int LimitedMatchesLost { get; set; }
-
-        // Metadata, prevent it gets written to json to avoid serializing issues
-        [JsonIgnore]
+        public int LimitedMatchesLost { get; set; }        
+        [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
-
+        // Metadata, prevent it gets written to json to avoid serializing issues
         [JsonIgnore]
         public string LogId { get; set; }
     }
