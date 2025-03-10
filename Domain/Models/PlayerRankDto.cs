@@ -44,6 +44,8 @@ namespace Domain.Models
         public int LimitedMatchesLost { get; set; }        
         [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
+        [JsonPropertyName("user")]
+        public string? CurrentUser { get; set; }
         // Metadata, prevent it gets written to json to avoid serializing issues
         [JsonIgnore]
         public string LogId { get; set; }

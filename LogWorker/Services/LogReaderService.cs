@@ -35,10 +35,17 @@ namespace LogWorker.Services
             {
                 string line;
                 string previousLine = string.Empty;
+                string currentUser = "";
                 while ((line = sr.ReadLine()) != null)
                 {
-                    logTransaction.UserInfo += FetchUserInfo(line, previousLine, sr);
-                    logTransaction.RankLogs += FetchRankInfo(line, previousLine, sr);
+                    var userLog = FetchUserInfo(line, previousLine, sr);
+                    logTransaction.UserInfo += userLog;                   
+                    if (!string.IsNullOrEmpty(userLog))
+                    {
+                        var userDto = JsonSerializer.Deserialize<UserInfoDto>(userLog);
+                        currentUser = userDto.UserNameWithCode;
+                    }
+                    logTransaction.RankLogs += FetchRankInfo(line, previousLine, sr, currentUser);
                     previousLine = line;
                 }
             }
@@ -56,7 +63,7 @@ namespace LogWorker.Services
                 var userNameSplit = userNameWithCode.Split("#");
                 var userName = userNameSplit[0];
                 var userCode = userNameSplit[1];
-                var userInfo = new UserInfoDto { UserName = userName, UserCode = userCode };
+                var userInfo = new UserInfoDto { UserNameWithCode = userNameWithCode, UserName = userName, UserCode = userCode };
                 var userInfoJson = JsonSerializer.Serialize(userInfo);
 
                 return userInfoJson;
@@ -65,7 +72,7 @@ namespace LogWorker.Services
             return string.Empty;
         }
 
-        private string FetchRankInfo(string line, string previousLine, StreamReader sr)
+        private string FetchRankInfo(string line, string previousLine, StreamReader sr, string currentUser)
         {
             var timestampMatch = Regex.Match(previousLine, @"\[UnityCrossThreadLogger\](\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})");
             if (line.Contains("Rank_GetCombinedRankInfo") && timestampMatch.Success)
@@ -73,7 +80,7 @@ namespace LogWorker.Services
                 var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
                 var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 var nextLine = sr.ReadLine();
-                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\"}}";
+                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"user\":\"{currentUser}\"}}";
                 return result;
             }
 
