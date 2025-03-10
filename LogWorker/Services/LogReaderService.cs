@@ -1,4 +1,7 @@
-﻿using Domain.Models;
+﻿using AutoMapper;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
 using Domain.Models.Settings;
 using LogWorker.Helpers;
 using Microsoft.Extensions.Options;
@@ -12,13 +15,21 @@ namespace LogWorker.Services
     {
         private readonly LogPathOptions _options;
         private readonly ILogger<LogReaderService> _logger;
-        public LogReaderService(IOptions<LogPathOptions> options, ILogger<LogReaderService> logger)
+        private readonly IMapper _mapper;
+
+        private readonly IUserInfoRepository _userInfoRepository;
+        private readonly IPlayerRankRepository _playerRankRepository;
+
+        public LogReaderService(IOptions<LogPathOptions> options, ILogger<LogReaderService> logger, IPlayerRankRepository playerRankRepository, IUserInfoRepository userInfoRepository, IMapper mapper)
         {
             _options = options.Value;
             _logger = logger;
+            _playerRankRepository = playerRankRepository;
+            _userInfoRepository = userInfoRepository;
+            _mapper = mapper;
         }
 
-        public async void ProcessLogFile()
+        public async Task ProcessLogFile()
         {
             var logTransaction = new LogTransaction();
             var logPath = _options.MtgaLogPath;
@@ -52,7 +63,42 @@ namespace LogWorker.Services
 
             // Deserialize into objects
             var rankDetailsList = JsonHelper.DeserializeJsonObjects<PlayerRankDto>(logTransaction.RankLogs, @"\{""constructedSeasonOrdinal"".*?\}");
-            var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, @"\{""UserName"".*?\}");
+            var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, @"\{""UserNameWithCode"".*?\}");
+
+            // Write into db
+            await WriteUserInfo(userInfo);
+            await WriteRankDetails(rankDetailsList);      
+        }
+
+        private async Task WriteRankDetails(List<PlayerRankDto> rankDetails)
+        {
+            //avoid user duplicates
+            rankDetails = rankDetails
+                .Where(r => !string.IsNullOrWhiteSpace(r.CurrentUser))
+                .GroupBy(u => u.LogId)
+                .Select(g => g.First())
+                .ToList();
+            var userNames = rankDetails.Select(r => r.CurrentUser).Distinct().ToList();
+            var users = await _userInfoRepository.GetUserIdsByUserNames(userNames);
+            var rankDetailsEntity = _mapper.Map<List<PlayerRank>>(rankDetails);
+            foreach (var rank in rankDetailsEntity)
+            {
+                rank.UserId = users.FirstOrDefault(u => u.UserNameWithCode == rank.CurrentUser)?.UserId
+                              ?? throw new Exception($"User '{rank.User.UserNameWithCode}' not found.");
+            }
+
+            await _playerRankRepository.AddRanksAsync(rankDetailsEntity);
+        }
+
+        private async Task WriteUserInfo(List<UserInfoDto> userInfo)
+        {
+            //avoid user duplicates
+            userInfo = userInfo
+                .GroupBy(u => u.UserName)
+                .Select(g => g.First())
+                .ToList();
+            var userInfoEntity = _mapper.Map<List<UserInfo>>(userInfo);
+            await _userInfoRepository.AddUsersAsync(userInfoEntity);
         }
 
         private string FetchUserInfo(string line, string previousLine, StreamReader sr)

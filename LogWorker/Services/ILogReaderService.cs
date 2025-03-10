@@ -4,6 +4,6 @@ namespace LogWorker.Services
 {
     public interface ILogReaderService
     {
-        void ProcessLogFile();
+        Task ProcessLogFile();
     }
 }

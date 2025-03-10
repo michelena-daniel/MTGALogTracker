@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
     public class PlayerRank
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int RankId { get; set; }
         [Required]
         public int ConstructedSeasonOrdinal { get; set; }
@@ -43,6 +38,8 @@ namespace Domain.Entities
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
         [Required]
         public string LogId { get; set; }
+        [Required]
+        public string CurrentUser { get; set; }
         [ForeignKey("UserInfo")]
         public int UserId { get; set; }
         public UserInfo User { get; set; }

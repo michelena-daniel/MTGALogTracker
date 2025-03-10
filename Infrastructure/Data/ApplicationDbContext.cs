@@ -25,6 +25,22 @@ namespace Infrastructure.Data
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<UserInfo>()
+           .HasIndex(u => u.UserNameWithCode)
+           .IsUnique();
+
+            modelBuilder.Entity<PlayerRank>()
+           .HasIndex(u => u.LogId)
+           .IsUnique();
+
+            modelBuilder.Entity<PlayerRank>()
+            .Property(p => p.TimeStamp)
+            .HasColumnType("timestamp with time zone")
+            .HasConversion(
+                v => v.ToUniversalTime(),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+            );
+
             base.OnModelCreating(modelBuilder);
         }
     }
