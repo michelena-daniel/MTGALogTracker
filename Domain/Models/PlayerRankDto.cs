@@ -41,13 +41,12 @@ namespace Domain.Models
         public int LimitedMatchesWon { get; set; }
 
         [JsonPropertyName("limitedMatchesLost")]
-        public int LimitedMatchesLost { get; set; }
-
-        // **Metadata fields (not part of JSON but added manually)**
-        [JsonIgnore] // Prevent these from being written back to JSON
+        public int LimitedMatchesLost { get; set; }        
+        [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
-
-        [JsonIgnore]
+        [JsonPropertyName("user")]
+        public string? CurrentUser { get; set; }
+        [JsonPropertyName("logId")]
         public string LogId { get; set; }
     }
 }

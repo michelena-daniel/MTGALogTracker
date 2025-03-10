@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogWorker", "LogWorker\LogW
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{C4FEB46E-CADE-4D86-A368-9E6EE11189A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5C8DF871-7BDE-49C4-9D92-15607F1989F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{C4FEB46E-CADE-4D86-A368-9E6EE11189A3}.Release|x64.Build.0 = Release|Any CPU
 		{C4FEB46E-CADE-4D86-A368-9E6EE11189A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{C4FEB46E-CADE-4D86-A368-9E6EE11189A3}.Release|x86.Build.0 = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|x64.Build.0 = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{5C8DF871-7BDE-49C4-9D92-15607F1989F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
