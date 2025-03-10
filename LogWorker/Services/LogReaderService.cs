@@ -72,12 +72,13 @@ namespace LogWorker.Services
 
         private async Task WriteRankDetails(List<PlayerRankDto> rankDetails)
         {
-            //avoid user duplicates
+            //avoid rank duplicates
             rankDetails = rankDetails
                 .Where(r => !string.IsNullOrWhiteSpace(r.CurrentUser))
                 .GroupBy(u => u.LogId)
                 .Select(g => g.First())
                 .ToList();
+            // add userId's to rank details
             var userNames = rankDetails.Select(r => r.CurrentUser).Distinct().ToList();
             var users = await _userInfoRepository.GetUserIdsByUserNames(userNames);
             var rankDetailsEntity = _mapper.Map<List<PlayerRank>>(rankDetails);
@@ -86,19 +87,40 @@ namespace LogWorker.Services
                 rank.UserId = users.FirstOrDefault(u => u.UserNameWithCode == rank.CurrentUser)?.UserId
                               ?? throw new Exception($"User '{rank.User.UserNameWithCode}' not found.");
             }
+            // filter out ranks whhich already exist on database
+            var logIds = rankDetailsEntity.Select(x => x.LogId).ToList();
+            var existingPlayerRanks = await _playerRankRepository.GetRanksByLogIds(logIds);
+            var existingPlayerRanksLogIds = existingPlayerRanks.Select(epr => epr.LogId);
+            var filteredRankDetails = rankDetailsEntity.Where(rd => !existingPlayerRanksLogIds.Contains(rd.LogId)).ToList();
 
-            await _playerRankRepository.AddRanksAsync(rankDetailsEntity);
+            if(filteredRankDetails == null || !filteredRankDetails.Any())
+            {
+                _logger.LogInformation("No new player ranks to insert");
+                return;
+            }
+
+            await _playerRankRepository.AddRanksAsync(filteredRankDetails);
         }
 
         private async Task WriteUserInfo(List<UserInfoDto> userInfo)
         {
-            //avoid user duplicates
+            // avoid user duplicates
             userInfo = userInfo
                 .GroupBy(u => u.UserName)
                 .Select(g => g.First())
                 .ToList();
-            var userInfoEntity = _mapper.Map<List<UserInfo>>(userInfo);
-            await _userInfoRepository.AddUsersAsync(userInfoEntity);
+            // filter users who already exist on database (being a local log file we shouldn't have a massive load so I fetch everything)
+            var existingUsers = await _userInfoRepository.GetAllUsers();
+            var existingUserNames = existingUsers.Select(u => u.UserNameWithCode).ToHashSet(); // Hash set for speed + uniqueness
+            var userInfoEntities = _mapper.Map<List<UserInfo>>(userInfo).Where(x => !existingUserNames.Contains(x.UserNameWithCode)).ToList();
+
+            if(userInfoEntities == null || !userInfoEntities.Any())
+            {
+                _logger.LogInformation("No new users to write");
+                return;
+            }
+
+            await _userInfoRepository.AddUsersAsync(userInfoEntities);
         }
 
         private string FetchUserInfo(string line, string previousLine, StreamReader sr)
