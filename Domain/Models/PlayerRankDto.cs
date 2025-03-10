@@ -46,8 +46,7 @@ namespace Domain.Models
         public DateTime TimeStamp { get; set; }
         [JsonPropertyName("user")]
         public string? CurrentUser { get; set; }
-        // Metadata, prevent it gets written to json to avoid serializing issues
-        [JsonIgnore]
+        [JsonPropertyName("logId")]
         public string LogId { get; set; }
     }
 }

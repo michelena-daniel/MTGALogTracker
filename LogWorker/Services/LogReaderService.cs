@@ -79,8 +79,9 @@ namespace LogWorker.Services
             {
                 var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
                 var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                var logId = line.Replace("<== Rank_GetCombinedRankInfo", "").Replace("(", "").Replace(")", "").Trim();
                 var nextLine = sr.ReadLine();
-                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"user\":\"{currentUser}\"}}";
+                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"logId\":\"{logId}\",\"user\":\"{currentUser}\"}}";
                 return result;
             }
 
