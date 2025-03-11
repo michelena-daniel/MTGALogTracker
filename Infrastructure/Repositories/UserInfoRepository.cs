@@ -40,7 +40,7 @@ namespace Infrastructure.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<List<UserInfo>> GetUserIdsByUserNames(List<string> userNames)
+        public async Task<List<UserInfo>> GetUsersByUserNames(List<string> userNames)
         {
             return await _context.Users
                 .Where(u => userNames.Contains(u.UserNameWithCode)).ToListAsync();

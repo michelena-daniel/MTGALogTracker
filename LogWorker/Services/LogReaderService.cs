@@ -53,7 +53,7 @@ namespace LogWorker.Services
                     if (!string.IsNullOrEmpty(userLog))
                     {
                         var userDto = JsonSerializer.Deserialize<UserInfoDto>(userLog);
-                        currentUser = userDto.UserNameWithCode;
+                        currentUser = userDto.UserNameWithCode.Trim();
                     }
                     logTransaction.RankLogs += FetchRankInfo(line, previousLine, sr, currentUser);
                     previousLine = line;
@@ -79,7 +79,7 @@ namespace LogWorker.Services
                 .ToList();
             // add userId's to rank details
             var userNames = rankDetails.Select(r => r.CurrentUser).Distinct().ToList();
-            var users = await _userInfoRepository.GetUserIdsByUserNames(userNames);
+            var users = await _userInfoRepository.GetUsersByUserNames(userNames);
             var rankDetailsEntity = _mapper.Map<List<PlayerRank>>(rankDetails);
             foreach (var rank in rankDetailsEntity)
             {
@@ -133,7 +133,7 @@ namespace LogWorker.Services
         {
             if(line.Contains("[Accounts - Login] Logged in successfully. Display Name:"))
             {
-                var userNameWithCode = line.Replace("[Accounts - Login] Logged in successfully. Display Name:", "");
+                var userNameWithCode = line.Replace("[Accounts - Login] Logged in successfully. Display Name:", "").Trim();
                 var userNameSplit = userNameWithCode.Split("#");
                 var userName = userNameSplit[0];
                 var userCode = userNameSplit[1];
@@ -155,7 +155,7 @@ namespace LogWorker.Services
                 var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 var logId = line.Replace("<== Rank_GetCombinedRankInfo", "").Replace("(", "").Replace(")", "").Trim();
                 var nextLine = sr.ReadLine();
-                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"logId\":\"{logId}\",\"user\":\"{currentUser}\"}}";
+                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"logId\":\"{logId}\",\"user\":\"{currentUser.Trim()}\"}}";
                 return result;
             }
 

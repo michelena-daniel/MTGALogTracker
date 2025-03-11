@@ -6,5 +6,6 @@ namespace Domain.Interfaces
     {
         Task AddRanksAsync(List<PlayerRank> ranks);
         Task<List<PlayerRank>> GetRanksByLogIds(List<string> logIds);
+        Task<List<PlayerRank>> GetPlayerRanksByPlayerName(string playerNameWithCode);
     }
 }

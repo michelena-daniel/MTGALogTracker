@@ -1,5 +1,3 @@
-using Domain.Interfaces;
-using Infrastructure.Data;
 using LogWorker.Services;
 
 namespace LogWorker;

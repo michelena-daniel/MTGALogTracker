@@ -39,5 +39,10 @@ namespace Infrastructure.Repositories
         {
             return await _context.PlayerRanks.Where(pr => logIds.Contains(pr.LogId)).ToListAsync();
         }
+
+        public async Task<List<PlayerRank>> GetPlayerRanksByPlayerName(string playerNameWithCode)
+        {
+            return await _context.PlayerRanks.Where(pr => pr.CurrentUser == playerNameWithCode).ToListAsync();
+        }
     }
 }
