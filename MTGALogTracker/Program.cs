@@ -1,5 +1,7 @@
 
+using Domain.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace MTGALogTracker
@@ -19,6 +21,9 @@ namespace MTGALogTracker
             // Add DbContext
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddScoped<IUserInfoRepository, UserInfoRepository>();
+            builder.Services.AddScoped<IPlayerRankRepository, PlayerRankRepository>();
 
             var app = builder.Build();
 
