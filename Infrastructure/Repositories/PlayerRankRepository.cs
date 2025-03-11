@@ -44,5 +44,15 @@ namespace Infrastructure.Repositories
         {
             return await _context.PlayerRanks.Where(pr => pr.CurrentUser == playerNameWithCode).ToListAsync();
         }
+
+        public async Task<string> GetLastRankedUser()
+        {
+            var lastRankedUser = await _context.PlayerRanks
+                .Where(pr => !string.IsNullOrEmpty(pr.CurrentUser))
+                .OrderByDescending(pr => pr.TimeStamp)
+                .FirstOrDefaultAsync();
+
+            return lastRankedUser?.CurrentUser ?? "";
+        }
     }
 }
