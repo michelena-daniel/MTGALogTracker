@@ -20,6 +20,8 @@ namespace LogWorker.Services
         private readonly IUserInfoRepository _userInfoRepository;
         private readonly IPlayerRankRepository _playerRankRepository;
 
+        private string _currentUser = "";
+
         public LogReaderService(IOptions<LogPathOptions> options, ILogger<LogReaderService> logger, IPlayerRankRepository playerRankRepository, IUserInfoRepository userInfoRepository, IMapper mapper)
         {
             _options = options.Value;
@@ -45,7 +47,7 @@ namespace LogWorker.Services
             {
                 string line;
                 string previousLine = string.Empty;
-                string currentUser = "";
+                //string currentUser = "";
                 while ((line = sr.ReadLine()) != null)
                 {
                     var userLog = FetchUserInfo(line, previousLine, sr);
@@ -53,9 +55,9 @@ namespace LogWorker.Services
                     if (!string.IsNullOrEmpty(userLog))
                     {
                         var userDto = JsonSerializer.Deserialize<UserInfoDto>(userLog);
-                        currentUser = userDto.UserNameWithCode.Trim();
+                        _currentUser = userDto.UserNameWithCode.Trim();
                     }
-                    logTransaction.RankLogs += FetchRankInfo(line, previousLine, sr, currentUser);
+                    logTransaction.RankLogs += await FetchRankInfo(line, previousLine, sr);
                     previousLine = line;
                 }
             }
@@ -146,20 +148,35 @@ namespace LogWorker.Services
             return string.Empty;
         }
 
-        private string FetchRankInfo(string line, string previousLine, StreamReader sr, string currentUser)
+        private async Task<string> FetchRankInfo(string line, string previousLine, StreamReader sr)
         {
             var timestampMatch = Regex.Match(previousLine, @"\[UnityCrossThreadLogger\](\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})");
             if (line.Contains("Rank_GetCombinedRankInfo") && timestampMatch.Success)
             {
+                if (string.IsNullOrEmpty(_currentUser))
+                {
+                    _currentUser = await _playerRankRepository.GetLastRankedUser();
+                }
                 var timeStampString = previousLine.Replace("[UnityCrossThreadLogger]", "");
                 var timeStamp = DateTime.ParseExact(timeStampString, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 var logId = line.Replace("<== Rank_GetCombinedRankInfo", "").Replace("(", "").Replace(")", "").Trim();
                 var nextLine = sr.ReadLine();
-                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"logId\":\"{logId}\",\"user\":\"{currentUser.Trim()}\"}}";
+                var result = nextLine == null ? string.Empty : nextLine.Remove(nextLine.Length-1, 1)+$",\"timeStamp\":\"{timeStamp}\",\"logId\":\"{logId}\",\"user\":\"{_currentUser.Trim()}\"}}";
                 return result;
             }
 
             return string.Empty;
-        }        
+        }
+
+        //private string FetchMatches(string line)
+        //{
+        //    if(line.Contains("[UnityCrossThreadLogger]11/03/2025 19:23:50: Match to")
+        //    return matchString;
+        //}
+
+        //private string FetchEventJoins()
+        //{
+
+        //}
     }
 }

@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
+    [Index(nameof(TimeStamp))]
     public class PlayerRank
     {
         [Key]
@@ -34,7 +36,7 @@ namespace Domain.Entities
         public int LimitedMatchesWon { get; set; }
         [Required]
         public int LimitedMatchesLost { get; set; }
-        [Required]
+        [Required]        
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
         [Required]
         public string LogId { get; set; }
