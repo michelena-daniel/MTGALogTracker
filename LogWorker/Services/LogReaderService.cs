@@ -47,7 +47,6 @@ namespace LogWorker.Services
             {
                 string line;
                 string previousLine = string.Empty;
-                //string currentUser = "";
                 while ((line = sr.ReadLine()) != null)
                 {
                     var userLog = FetchUserInfo(line, previousLine, sr);
