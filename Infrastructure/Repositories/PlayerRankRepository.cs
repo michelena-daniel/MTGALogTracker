@@ -40,19 +40,30 @@ namespace Infrastructure.Repositories
             return await _context.PlayerRanks.Where(pr => logIds.Contains(pr.LogId)).ToListAsync();
         }
 
-        public async Task<List<PlayerRank>> GetPlayerRanksByPlayerName(string playerNameWithCode)
+        public async Task<PlayerRank?> GetLastRankedUser()
         {
-            return await _context.PlayerRanks.Where(pr => pr.CurrentUser == playerNameWithCode).ToListAsync();
-        }
-
-        public async Task<string> GetLastRankedUser()
-        {
-            var lastRankedUser = await _context.PlayerRanks
-                .Where(pr => !string.IsNullOrEmpty(pr.CurrentUser))
+            return await _context.PlayerRanks
+                .Where(pr => !string.IsNullOrEmpty(pr.MtgArenaUserId))
                 .OrderByDescending(pr => pr.TimeStamp)
                 .FirstOrDefaultAsync();
+        }
 
-            return lastRankedUser?.CurrentUser ?? "";
+        public async Task<PlayerRank?> GetLastRankedUserByMtgId(string mtgArenaId)
+        {
+            return await _context.PlayerRanks
+                .Where(pr => !string.IsNullOrEmpty(pr.MtgArenaUserId) && pr.MtgArenaUserId == mtgArenaId)
+                .OrderByDescending(pr => pr.TimeStamp)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<PlayerRank>> GetLastRankedUsersByMtgArenaIds(List<string> mtgArenaIds)
+        {
+            return await _context.PlayerRanks.Where(pr => pr.MtgArenaUserId != null && mtgArenaIds.Contains(pr.MtgArenaUserId)).ToListAsync();
+        }
+
+        public async Task<List<PlayerRank>> GetRanksByMtgArenaId(string mtgArenaId)
+        {
+            return await _context.PlayerRanks.Where(pr => pr.MtgArenaUserId == mtgArenaId).ToListAsync();
         }
     }
 }

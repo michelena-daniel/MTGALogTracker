@@ -8,8 +8,8 @@ namespace Domain.Entities
     public class PlayerRank
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int RankId { get; set; }
+        [Required]
+        public string LogId { get; set; }
         [Required]
         public int ConstructedSeasonOrdinal { get; set; }
         [Required]
@@ -37,13 +37,11 @@ namespace Domain.Entities
         [Required]
         public int LimitedMatchesLost { get; set; }
         [Required]        
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
-        [Required]
-        public string LogId { get; set; }
-        [Required]
-        public string CurrentUser { get; set; }
+        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;        
+        //[Required]
+        //public string CurrentUser { get; set; }
         [ForeignKey("UserInfo")]
-        public int UserId { get; set; }
+        public string? MtgArenaUserId { get; set; }
         public UserInfo User { get; set; }
     }
 }

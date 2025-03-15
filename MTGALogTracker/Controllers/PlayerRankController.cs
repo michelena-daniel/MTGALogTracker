@@ -14,13 +14,13 @@ namespace MTGALogTrackerApi.Controllers
         }
 
         [HttpGet("{playerNameWithCode}")]
-        public async Task<IActionResult> GetRanksByPlayer([FromRoute] string playerNameWithCode)
+        public async Task<IActionResult> GetRanksByPlayer([FromRoute] string mtgArenaId)
         {
-            if (string.IsNullOrEmpty(playerNameWithCode))
-                return BadRequest("Player name cannot be empty");
-            var ranks = await _playerRankRepository.GetPlayerRanksByPlayerName(playerNameWithCode);
+            if (string.IsNullOrEmpty(mtgArenaId))
+                return BadRequest("Id cannot be empty");
+            var ranks = await _playerRankRepository.GetRanksByMtgArenaId(mtgArenaId);
             if (!ranks.Any())
-                return NotFound($"Ranks not found for player {playerNameWithCode}");
+                return NotFound($"Ranks not found for player id {mtgArenaId}");
             return Ok(ranks);
         }
     }

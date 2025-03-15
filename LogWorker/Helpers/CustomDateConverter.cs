@@ -6,7 +6,7 @@ namespace LogWorker.Helpers
 {
     public class CustomDateConverter : JsonConverter<DateTime>
     {
-        private const string DateFormat = "dd/MM/yyyy HH:mm:ss";
+        private const string DateFormat = "dd/MM/yyyy H:mm:ss";
 
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

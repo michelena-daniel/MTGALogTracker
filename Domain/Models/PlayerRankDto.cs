@@ -4,6 +4,8 @@ namespace Domain.Models
 {
     public class PlayerRankDto
     {
+        [JsonPropertyName("logId")]
+        public string LogId { get; set; }
         [JsonPropertyName("constructedSeasonOrdinal")]
         public int ConstructedSeasonOrdinal { get; set; }
 
@@ -44,9 +46,9 @@ namespace Domain.Models
         public int LimitedMatchesLost { get; set; }        
         [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
-        [JsonPropertyName("user")]
-        public string? CurrentUser { get; set; }
-        [JsonPropertyName("logId")]
-        public string LogId { get; set; }
+        [JsonPropertyName("mtgArenaUserId")]
+        public string? MtgArenaUserId { get; set; }
+        [JsonPropertyName("playerName")]
+        public string? PlayerName { get; set; }      
     }
 }

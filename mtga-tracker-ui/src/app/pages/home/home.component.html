@@ -1,1 +1,13 @@
-<p>home works!</p>
+<mat-form-field appearance="fill">
+    <mat-label>Select User</mat-label>
+    <mat-select [formControl]="userControl" required>
+      <mat-option value="">--</mat-option>
+      @for (user of users; track user.userId) {
+        <mat-option [value]="user.userId">{{user.userNameWithCode}}</mat-option>
+      }
+    </mat-select>
+    @if (userControl.hasError('required')) {
+        <mat-error>Please, choose user</mat-error>
+    }
+    <mat-hint>User updated!</mat-hint>
+</mat-form-field>

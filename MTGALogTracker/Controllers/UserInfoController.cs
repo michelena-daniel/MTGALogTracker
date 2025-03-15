@@ -21,13 +21,13 @@ namespace MTGALogTrackerApi.Controllers
         }
 
         [HttpGet("usernames")]
-        public async Task<IActionResult> GetUsersByUsernames([FromQuery] List<string> userNames)
+        public async Task<IActionResult> GetUsersByMtgArenaIds([FromQuery] List<string> mtgArenaIds)
         {
-            if(userNames == null || !userNames.Any())
+            if(mtgArenaIds == null || !mtgArenaIds.Any())
             {
-                return BadRequest("Usernames cannot be empty.");
+                return BadRequest("Ids cannot be empty.");
             }
-            var users = await _userInfoRepository.GetUsersByUserNames(userNames);
+            var users = await _userInfoRepository.GetUsersByMtgArenaIds(mtgArenaIds);
             return Ok(users);
         }
     }

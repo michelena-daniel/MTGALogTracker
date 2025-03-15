@@ -23,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUserInfoRepository, UserInfoRepository>();
 builder.Services.AddScoped<IPlayerRankRepository, PlayerRankRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
 var host = builder.Build();
 host.Run();

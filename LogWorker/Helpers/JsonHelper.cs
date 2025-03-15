@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace LogWorker.Helpers
 {
@@ -10,17 +9,16 @@ namespace LogWorker.Helpers
             Converters = { new CustomDateConverter() }
         };
 
-        public static List<T> DeserializeJsonObjects<T>(string logs, string jsonPattern)
+        public static List<T> DeserializeJsonObjects<T>(string logs, string delimeter)
         {
-            var regex = new Regex(jsonPattern, RegexOptions.Singleline);
-            var matches = regex.Matches(logs);
+            var jsonList = logs.Split(delimeter, StringSplitOptions.RemoveEmptyEntries);
             var resultList = new List<T>();
 
-            foreach (Match match in matches)
+            foreach (var json in jsonList)
             {
                 try
                 {
-                    var deserializedObject = JsonSerializer.Deserialize<T>(match.Value, _options);
+                    var deserializedObject = JsonSerializer.Deserialize<T>(json, _options);
                     if (deserializedObject != null)
                     {
                         resultList.Add(deserializedObject);

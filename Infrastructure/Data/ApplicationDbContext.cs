@@ -11,6 +11,7 @@ namespace Infrastructure.Data
 
         public DbSet<UserInfo> Users { get; set; }
         public DbSet<PlayerRank> PlayerRanks { get; set; }
+        public DbSet<Match> Matches { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -22,15 +23,25 @@ namespace Infrastructure.Data
             modelBuilder.Entity<PlayerRank>()
             .HasOne(p => p.User)
             .WithMany(u => u.PlayerRanks)
-            .HasForeignKey(p => p.UserId)
+            .HasForeignKey(p => p.MtgArenaUserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Match>()
+            .HasOne(m => m.User)
+            .WithMany(u => u.Matches)
+            .HasForeignKey(m => m.HomeUser)
+            .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<UserInfo>()
-           .HasIndex(u => u.UserNameWithCode)
+           .HasIndex(u => u.MtgaInternalUserId)
            .IsUnique();
 
             modelBuilder.Entity<PlayerRank>()
            .HasIndex(u => u.LogId)
+           .IsUnique();
+
+            modelBuilder.Entity<Match>()
+           .HasIndex(u => u.MatchId)
            .IsUnique();
 
             modelBuilder.Entity<PlayerRank>()

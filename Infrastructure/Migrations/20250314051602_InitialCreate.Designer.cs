@@ -12,26 +12,78 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250310034622_InitMtgaTracker")]
-    partial class InitMtgaTracker
+    [Migration("20250314051602_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.PlayerRank", b =>
+            modelBuilder.Entity("Domain.Entities.Match", b =>
                 {
-                    b.Property<int>("RankId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("MatchId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("HomeUser")
+                        .HasColumnType("VARCHAR(255)");
+
+                    b.Property<bool>("IsDraw")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MatchCompletedReason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerOneMtgaId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerOneName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerTwoMtgaId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlayerTwoName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RequestId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RankId"));
+                    b.Property<string>("TimeStamp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("WinningTeamId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MatchId");
+
+                    b.HasIndex("HomeUser");
+
+                    b.HasIndex("MatchId")
+                        .IsUnique();
+
+                    b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PlayerRank", b =>
+                {
+                    b.Property<string>("LogId")
+                        .HasColumnType("text");
 
                     b.Property<string>("ConstructedClass")
                         .IsRequired()
@@ -74,36 +126,33 @@ namespace Infrastructure.Migrations
                     b.Property<int>("LimitedStep")
                         .HasColumnType("integer");
 
-                    b.Property<string>("LogId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<string>("MtgArenaUserId")
+                        .HasColumnType("VARCHAR(255)");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RankId");
+                    b.HasKey("LogId");
 
                     b.HasIndex("LogId")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("MtgArenaUserId");
+
+                    b.HasIndex("TimeStamp");
 
                     b.ToTable("PlayerRanks");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserInfo", b =>
                 {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.Property<string>("MtgaInternalUserId")
+                        .HasColumnType("VARCHAR(255)");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserCode")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(100)");
 
                     b.Property<string>("UserName")
@@ -111,30 +160,40 @@ namespace Infrastructure.Migrations
                         .HasColumnType("VARCHAR(100)");
 
                     b.Property<string>("UserNameWithCode")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(100)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("MtgaInternalUserId");
 
-                    b.HasIndex("UserNameWithCode")
+                    b.HasIndex("MtgaInternalUserId")
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Match", b =>
+                {
+                    b.HasOne("Domain.Entities.UserInfo", "User")
+                        .WithMany("Matches")
+                        .HasForeignKey("HomeUser")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.PlayerRank", b =>
                 {
                     b.HasOne("Domain.Entities.UserInfo", "User")
                         .WithMany("PlayerRanks")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MtgArenaUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserInfo", b =>
                 {
+                    b.Navigation("Matches");
+
                     b.Navigation("PlayerRanks");
                 });
 #pragma warning restore 612, 618
