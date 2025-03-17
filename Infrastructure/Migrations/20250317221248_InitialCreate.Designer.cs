@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250314051602_InitialCreate")]
+    [Migration("20250317221248_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -56,7 +56,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RequestId")
+                    b.Property<int?>("RequestId")
                         .HasColumnType("integer");
 
                     b.Property<string>("TimeStamp")
@@ -64,7 +64,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TransactionId")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WinnerMtgArenaId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WinnerName")
                         .HasColumnType("text");
 
                     b.Property<int>("WinningTeamId")

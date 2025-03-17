@@ -53,7 +53,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RequestId")
+                    b.Property<int?>("RequestId")
                         .HasColumnType("integer");
 
                     b.Property<string>("TimeStamp")
@@ -61,7 +61,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TransactionId")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WinnerMtgArenaId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WinnerName")
                         .HasColumnType("text");
 
                     b.Property<int>("WinningTeamId")

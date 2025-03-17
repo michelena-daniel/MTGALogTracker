@@ -3,8 +3,8 @@
     public class Match
     {
         public string MatchId { get; set; }
-        public int RequestId { get; set; }
-        public string TransactionId { get; set; }
+        public int? RequestId { get; set; }
+        public string? TransactionId { get; set; }
         public string TimeStamp { get; set; }
         public string MatchCompletedReason { get; set; }
         public bool IsDraw { get; set; }
@@ -14,6 +14,8 @@
         public string PlayerOneMtgaId { get; set; }
         public string PlayerTwoMtgaId { get; set; }
         public string? HomeUser { get; set; }
+        public string? WinnerMtgArenaId { get; set; }
+        public string? WinnerName { get; set; }
         public UserInfo User { get; set; }
     }
 }

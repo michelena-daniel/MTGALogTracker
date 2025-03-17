@@ -29,6 +29,11 @@ namespace Infrastructure.Repositories
             return await _context.Matches.Where(m => matchIds.Contains(m.MatchId)).ToListAsync();
         }
 
+        public async Task<List<Match>> GetMatchesByMtgArenaId(string mtgArenaId)
+        {
+            return await _context.Matches.Where(m => m.HomeUser == mtgArenaId).ToListAsync();
+        }
+
         public async Task<List<Match>> GetUnknownMatches()
         {
             return await _context.Matches.Where(m => m.HomeUser == "").ToListAsync();

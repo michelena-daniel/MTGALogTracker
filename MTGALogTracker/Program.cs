@@ -24,6 +24,7 @@ namespace MTGALogTracker
 
             builder.Services.AddScoped<IUserInfoRepository, UserInfoRepository>();
             builder.Services.AddScoped<IPlayerRankRepository, PlayerRankRepository>();
+            builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
             builder.Services.AddCors(options =>
             {

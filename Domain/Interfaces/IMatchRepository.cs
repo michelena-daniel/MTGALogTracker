@@ -10,5 +10,6 @@ namespace Domain.Interfaces
         Task UpdateMatchesWithHomeUser(List<Match> matches);
         Task<List<Entities.Match>> GetAllMatches();
         Task<Match?> GetLastMatchPlayed();
+        Task<List<Match>> GetMatchesByMtgArenaId(string mtgArenaId);
     }
 }

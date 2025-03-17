@@ -319,6 +319,13 @@ namespace LogWorker.Services
                 {
                     matchEntity.WinningTeamId = result.WinningTeamId;
                 }
+                // determine win
+                var playerOneTeamId = match.MatchGameRoomStateChangedEvent.GameRoomInfo.GameRoomConfig.ReservedPlayers[0].TeamId;
+                var winningTeamId = match.MatchGameRoomStateChangedEvent.GameRoomInfo.FinalMatchResult.ResultList[0].WinningTeamId;
+                var winnerMtgaArenaId = playerOneTeamId == winningTeamId ? matchEntity.PlayerOneMtgaId : matchEntity.PlayerTwoMtgaId;
+                var winnerName = match.MatchGameRoomStateChangedEvent.GameRoomInfo.GameRoomConfig.ReservedPlayers.Where(p => p.UserId == winnerMtgaArenaId).Select(p => p.PlayerName).FirstOrDefault();
+                matchEntity.WinnerMtgArenaId = winnerMtgaArenaId;
+                matchEntity.WinnerName = winnerName;
 
                 matchesEntities.Add(matchEntity);
             }

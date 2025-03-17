@@ -31,8 +31,8 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     MatchId = table.Column<string>(type: "text", nullable: false),
-                    RequestId = table.Column<int>(type: "integer", nullable: false),
-                    TransactionId = table.Column<string>(type: "text", nullable: false),
+                    RequestId = table.Column<int>(type: "integer", nullable: true),
+                    TransactionId = table.Column<string>(type: "text", nullable: true),
                     TimeStamp = table.Column<string>(type: "text", nullable: false),
                     MatchCompletedReason = table.Column<string>(type: "text", nullable: false),
                     IsDraw = table.Column<bool>(type: "boolean", nullable: false),
@@ -41,7 +41,9 @@ namespace Infrastructure.Migrations
                     PlayerTwoName = table.Column<string>(type: "text", nullable: false),
                     PlayerOneMtgaId = table.Column<string>(type: "text", nullable: false),
                     PlayerTwoMtgaId = table.Column<string>(type: "text", nullable: false),
-                    HomeUser = table.Column<string>(type: "VARCHAR(255)", nullable: true)
+                    HomeUser = table.Column<string>(type: "VARCHAR(255)", nullable: true),
+                    WinnerMtgArenaId = table.Column<string>(type: "text", nullable: true),
+                    WinnerName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

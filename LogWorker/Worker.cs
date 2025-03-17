@@ -1,4 +1,5 @@
 using LogWorker.Services;
+using System.Diagnostics;
 
 namespace LogWorker;
 
@@ -17,13 +18,27 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using (var scope = _serviceProvider.CreateScope())
+            if (IsMTGAOpen())
             {
-                _logger.LogInformation("Waking up MTGA log worker.");               
-                var logReaderService = scope.ServiceProvider.GetRequiredService<ILogReaderService>();
-                await logReaderService.ProcessLogFile();
-                await Task.Delay(1000, stoppingToken);
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    _logger.LogInformation("Waking up MTGA log worker.");
+                    var logReaderService = scope.ServiceProvider.GetRequiredService<ILogReaderService>();
+                    await logReaderService.ProcessLogFile();                    
+                }
             }
+            else
+            {
+                _logger.LogInformation("MTGA process not detected. Skipping log reader.");
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
+    }
+
+    private bool IsMTGAOpen()
+    {
+        //return Process.GetProcessesByName("MTGA").Any();
+        return true;
     }
 }

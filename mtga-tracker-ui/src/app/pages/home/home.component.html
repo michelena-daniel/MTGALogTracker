@@ -2,12 +2,54 @@
     <mat-label>Select User</mat-label>
     <mat-select [formControl]="userControl" required>
       <mat-option value="">--</mat-option>
-      @for (user of users; track user.userId) {
-        <mat-option [value]="user.userId">{{user.userNameWithCode}}</mat-option>
+      @for (user of users; track user.mtgaInternalUserId) {
+        <mat-option [value]="user.mtgaInternalUserId">{{user.userName}}</mat-option>
       }
     </mat-select>
     @if (userControl.hasError('required')) {
         <mat-error>Please, choose user</mat-error>
     }
-    <mat-hint>User updated!</mat-hint>
+    @else {
+        <mat-hint>User updated!</mat-hint>
+    }    
 </mat-form-field>
+
+<table mat-table [dataSource]="matches" class="mat-elevation-z8" *ngIf="matches.length > 0">
+    <ng-container matColumnDef="matchId">
+      <th mat-header-cell *matHeaderCellDef> Match ID </th>
+      <td mat-cell *matCellDef="let match"> {{ match.matchId }} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="playerOne">
+      <th mat-header-cell *matHeaderCellDef> Player One </th>
+      <td mat-cell *matCellDef="let match"> {{ match.playerOneName }} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="playerTwo">
+      <th mat-header-cell *matHeaderCellDef> Player Two </th>
+      <td mat-cell *matCellDef="let match"> {{ match.playerTwoName }} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="timestamp">
+      <th mat-header-cell *matHeaderCellDef> Time </th>
+      <td mat-cell *matCellDef="let match"> {{ match.timeStamp | date:'short' }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="winner">
+        <th mat-header-cell *matHeaderCellDef> Winner </th>
+        <td mat-cell *matCellDef="let match"> {{ match.winnerName }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="winnerMtgArenaId">
+        <th mat-header-cell *matHeaderCellDef> Winner MTG Arena ID </th>
+        <td mat-cell *matCellDef="let match"> {{ match.winnerMtgArenaId }} </td>
+      </ng-container>
+  
+    <ng-container matColumnDef="homeUser">
+        <th mat-header-cell *matHeaderCellDef> Home User </th>
+        <td mat-cell *matCellDef="let match"> {{ match.homeUser }} </td>
+    </ng-container>
+    
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class]="getRowClass(row)"></tr>
+</table>
