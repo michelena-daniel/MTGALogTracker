@@ -13,7 +13,7 @@ namespace MTGALogTrackerApi.Controllers
             _playerRankRepository = playerRankRepository;
         }
 
-        [HttpGet("{playerNameWithCode}")]
+        [HttpGet("{mtgArenaId}")]
         public async Task<IActionResult> GetRanksByPlayer([FromRoute] string mtgArenaId)
         {
             if (string.IsNullOrEmpty(mtgArenaId))
