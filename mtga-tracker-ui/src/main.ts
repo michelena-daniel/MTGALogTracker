@@ -1,16 +1,26 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
-import { routes } from './app/app.routes';
-import { importProvidersFrom } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatCardModule } from '@angular/material/card';
-import { AppComponent } from './app/app.component';
-import { provideHttpClient } from '@angular/common/http';
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    importProvidersFrom(MatToolbarModule, MatCardModule),
-    provideRouter(routes),
-    provideHttpClient()
-  ],
-}).catch((err) => console.error(err));
+import App from './App.vue'
+import router from './router'
+import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura'
+import 'primeicons/primeicons.css'
+
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(router)
+app.use(PrimeVue, {
+  // Default theme configuration
+  theme: {
+    preset: Aura,
+    options: {
+      prefix: 'p',
+      darkModeSelector: 'system',
+      cssLayer: false,
+    },
+  },
+})
+
+app.mount('#app')
