@@ -27,6 +27,8 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddTransient<IUserInfoService, UserInfoService>();
 builder.Services.AddTransient<IRankService, RankService>();
 builder.Services.AddTransient<IMatchService, MatchService>();
+builder.Services.AddTransient<IDeckService, DeckService>();
+builder.Services.AddTransient<IEventService, EventService>();
 
 var host = builder.Build();
 host.Run();

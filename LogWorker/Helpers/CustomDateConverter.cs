@@ -10,6 +10,7 @@ namespace LogWorker.Helpers
 
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
+            var readerString = reader.GetString();
             if (DateTime.TryParseExact(reader.GetString(), DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             {
                 return date;

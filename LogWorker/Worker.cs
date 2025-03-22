@@ -38,6 +38,7 @@ public class Worker : BackgroundService
 
     private bool IsMTGAOpen()
     {
-        return Process.GetProcessesByName("MTGA").Any();
+        //return Process.GetProcessesByName("MTGA").Any();
+        return true;
     }
 }

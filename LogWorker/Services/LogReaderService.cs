@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Domain.Models.Deck;
 using Domain.Models.Settings;
 using LogWorker.Helpers;
 using Microsoft.Extensions.Options;
@@ -14,10 +15,12 @@ namespace LogWorker.Services
         private readonly IUserInfoService _userInfoService;
         private readonly IRankService _rankService;
         private readonly IMatchService _matchService;
+        private readonly IEventService _eventService;
+        private readonly IDeckService _deckService;
 
         private const string _delimeter = "\n---JSON-END---\n";
 
-        public LogReaderService(IOptions<LogPathOptions> options, ILogger<LogReaderService> logger, IRankService rankService, IUserInfoService userInfoService, IMatchService matchService)
+        public LogReaderService(IOptions<LogPathOptions> options, ILogger<LogReaderService> logger, IRankService rankService, IUserInfoService userInfoService, IMatchService matchService, IDeckService deckService, IEventService eventService)
         {
             _options = options.Value;
             _logger = logger;
@@ -25,6 +28,8 @@ namespace LogWorker.Services
             _userInfoService = userInfoService;
             _matchService = matchService;
             _rankService = rankService;
+            _deckService = deckService;
+            _eventService = eventService;
         }
 
         public async Task ProcessLogFile()
@@ -51,6 +56,10 @@ namespace LogWorker.Services
 
                     logTransaction.UserInfo += loginLog;
                     logTransaction.Authentications += authenticationLog;
+
+                    logTransaction.EventInfo += _eventService.FetchEventJoin(line, sr, _delimeter, logState);
+                    logTransaction.DeckInfo += _deckService.FetchDeck(line, sr, _delimeter);
+
                     logTransaction.RankLogs += _rankService.FetchRankInfo(line, previousLine, sr, logState, _delimeter);
                     logTransaction.Matches += _matchService.FetchMatches(line, _delimeter);
                     previousLine = line;
@@ -61,15 +70,17 @@ namespace LogWorker.Services
             var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, _delimeter);
             var matches = JsonHelper.DeserializeJsonObjects<MatchDto>(logTransaction.Matches, _delimeter);
             var authentications = JsonHelper.DeserializeJsonObjects<AuthenticateLogDto>(logTransaction.Authentications, _delimeter);
-            var matchesMapped = _matchService.MapMatches(matches);        
+            var matchesMapped = _matchService.MapMatches(matches);
+            var eventsInfo = JsonHelper.DeserializeJsonObjects<EventRequest>(logTransaction.EventInfo, _delimeter);
+            var decksInfo = JsonHelper.DeserializeJsonObjects<EventSetDeckV2Dto>(logTransaction.DeckInfo, _delimeter);
             // 3 - Write         
-            if(authentications.Count > 0)
+            if (authentications.Count > 0)
             {
                 await _userInfoService.AddAuthenticatedUsersIfNotExists(authentications);
                 await _userInfoService.UpdateUserNameWithCodeIfExists(userInfo);
                 await _matchService.WriteMatches(matchesMapped);
                 await _rankService.WriteRankDetails(rankDetailsList);
-            }                   
+            }
 
             _logger.LogInformation("Reader complete");
         }
