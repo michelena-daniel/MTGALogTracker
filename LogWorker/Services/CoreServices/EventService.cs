@@ -13,7 +13,7 @@ namespace LogWorker.Services.CoreServices
 
         }
 
-        public string FetchEventJoin(string line, StreamReader sr, string delimeter, LogAuthenticationState state)
+        public string FetchEventJoin(string line, StreamReader sr, string delimeter, LogAuthenticationState state, EventState eventState)
         {
             if(line.Contains("[UnityCrossThreadLogger]==> Event_Join"))
             {
@@ -26,6 +26,9 @@ namespace LogWorker.Services.CoreServices
                 eventRequest.TimeStamp = timeStamp;
                 eventRequest.MtgArenaId = state.MtgArenaId;
                 eventRequest.UserName = state.UserName;
+
+                if(!string.IsNullOrEmpty(eventRequest.EventName))
+                    eventState.UpdateEventStateType(eventRequest.EventName);
 
                 var options = new JsonSerializerOptions();
                 options.Converters.Add(new CustomDateConverter());

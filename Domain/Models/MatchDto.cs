@@ -17,5 +17,8 @@ namespace Domain.Models
         public string Timestamp { get; set; }
         [JsonPropertyName("matchGameRoomStateChangedEvent")]
         public MatchGameRoomStateChangedEvent MatchGameRoomStateChangedEvent { get; set; }
+        public string? EventType { get; set; }
+        public string? DeckId { get; set; }
+        public string? DeckName { get; set; }
     }
 }

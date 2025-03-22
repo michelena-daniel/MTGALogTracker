@@ -44,6 +44,7 @@ namespace LogWorker.Services
             }
             // 1 - Read
             var logState = new LogAuthenticationState();
+            var eventState = new EventState();
             using (FileStream fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader sr = new StreamReader(fs))
             {
@@ -57,11 +58,11 @@ namespace LogWorker.Services
                     logTransaction.UserInfo += loginLog;
                     logTransaction.Authentications += authenticationLog;
 
-                    logTransaction.EventInfo += _eventService.FetchEventJoin(line, sr, _delimeter, logState);
-                    logTransaction.DeckInfo += _deckService.FetchDeck(line, sr, _delimeter);
+                    logTransaction.EventInfo += _eventService.FetchEventJoin(line, sr, _delimeter, logState, eventState);
+                    logTransaction.DeckInfo += _deckService.FetchDeck(line, sr, _delimeter, eventState);
 
                     logTransaction.RankLogs += _rankService.FetchRankInfo(line, previousLine, sr, logState, _delimeter);
-                    logTransaction.Matches += _matchService.FetchMatches(line, _delimeter);
+                    logTransaction.Matches += _matchService.FetchMatches(line, _delimeter, eventState);
                     previousLine = line;
                 }
             }
@@ -70,9 +71,10 @@ namespace LogWorker.Services
             var userInfo = JsonHelper.DeserializeJsonObjects<UserInfoDto>(logTransaction.UserInfo, _delimeter);
             var matches = JsonHelper.DeserializeJsonObjects<MatchDto>(logTransaction.Matches, _delimeter);
             var authentications = JsonHelper.DeserializeJsonObjects<AuthenticateLogDto>(logTransaction.Authentications, _delimeter);
-            var matchesMapped = _matchService.MapMatches(matches);
             var eventsInfo = JsonHelper.DeserializeJsonObjects<EventRequest>(logTransaction.EventInfo, _delimeter);
             var decksInfo = JsonHelper.DeserializeJsonObjects<EventSetDeckV2Dto>(logTransaction.DeckInfo, _delimeter);
+            var matchesMapped = _matchService.MapMatches(matches);
+            
             // 3 - Write         
             if (authentications.Count > 0)
             {

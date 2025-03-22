@@ -1,6 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Models;
+using Mono.TextTemplating;
+using System.Text.Json;
 
 namespace LogWorker.Services.CoreServices
 {
@@ -17,12 +19,28 @@ namespace LogWorker.Services.CoreServices
             _logger = logger;
         }
 
-        public string FetchMatches(string line, string delimeter)
+        public string FetchMatches(string line, string delimeter, EventState eventState)
         {
             if (line.Contains("\"stateType\": \"MatchGameRoomStateType_MatchCompleted\", \"finalMatchResult\":"))
             {
-                return line + delimeter;
+                try
+                {
+                    var match = JsonSerializer.Deserialize<MatchDto>(line);
+                    match.DeckName = eventState.DeckName;
+                    match.DeckId = eventState.Deck;
+                    match.EventType = eventState.EventType;
+
+                    var json = JsonSerializer.Serialize(match);
+
+                    return json;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error serializing match to assign event values.");
+                    return string.Empty;
+                }
             }
+
             return string.Empty;
         }
 
@@ -101,6 +119,9 @@ namespace LogWorker.Services.CoreServices
                 {
                     matchEntity.WinningTeamId = result.WinningTeamId;
                 }
+                matchEntity.DeckId = match.DeckId;
+                matchEntity.DeckName = match.DeckName;
+                matchEntity.EventType = match.EventType;
                 // determine win
                 var playerOneTeamId = match.MatchGameRoomStateChangedEvent.GameRoomInfo.GameRoomConfig.ReservedPlayers[0].TeamId;
                 var winningTeamId = match.MatchGameRoomStateChangedEvent.GameRoomInfo.FinalMatchResult.ResultList[0].WinningTeamId;

@@ -16,6 +16,9 @@
         public string? HomeUser { get; set; }
         public string? WinnerMtgArenaId { get; set; }
         public string? WinnerName { get; set; }
+        public string? DeckId { get; set; }
+        public string? DeckName { get; set; }
+        public string? EventType { get; set; }
         public UserInfo User { get; set; }
     }
 }
