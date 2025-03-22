@@ -6,6 +6,7 @@ using Infrastructure.Repositories;
 using LogWorker;
 using LogWorker.Services;
 using LogWorker.Services.CoreServices;
+using LogWorker.Services.Downloader;
 using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -17,8 +18,8 @@ builder.Services.AddAutoMapper(typeof(UserProfile));
 
 builder.Services.Configure<LogPathOptions>(
     builder.Configuration.GetSection("LogPath"));
-builder.Services.Configure<LogPathOptions>(
-    builder.Configuration.GetSection("LogPath"));
+builder.Services.Configure<MtgaJsonOptions>(
+    builder.Configuration.GetSection("MtgaJson"));
 
 builder.Services.AddTransient<ILogReaderService, LogReaderService>();
 builder.Services.AddScoped<IUserInfoRepository, UserInfoRepository>();
@@ -29,6 +30,7 @@ builder.Services.AddTransient<IRankService, RankService>();
 builder.Services.AddTransient<IMatchService, MatchService>();
 builder.Services.AddTransient<IDeckService, DeckService>();
 builder.Services.AddTransient<IEventService, EventService>();
+builder.Services.AddTransient<IMtgaJsonService, MtgaJsonService>();
 
 var host = builder.Build();
 host.Run();

@@ -1,3 +1,4 @@
+using Domain.Interfaces;
 using LogWorker.Services;
 using System.Diagnostics;
 
@@ -22,6 +23,11 @@ public class Worker : BackgroundService
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                    var mtgaService = scope.ServiceProvider.GetRequiredService<IMtgaJsonService>();
+                    if (mtgaService.ShouldDownloadMtgaJson())
+                    {
+                        await mtgaService.DownloadMtgaJsonAsync();
+                    }
                     _logger.LogInformation("Waking up MTGA log worker.");
                     var logReaderService = scope.ServiceProvider.GetRequiredService<ILogReaderService>();
                     await logReaderService.ProcessLogFile();                    
@@ -38,7 +44,6 @@ public class Worker : BackgroundService
 
     private bool IsMTGAOpen()
     {
-        //return Process.GetProcessesByName("MTGA").Any();
-        return true;
-    }
+        return Process.GetProcessesByName("MTGA").Any();
+    }    
 }
